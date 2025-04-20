@@ -8,8 +8,8 @@ interface NovoTorneio {
 }
 
 interface AdicionarStartupAoTorneio {
-  torneioId: string;
-  startupId: string;
+  torneio_id: string;
+  startup_id: string;
 }
 
 export const useCriarTorneio = () => {
@@ -39,10 +39,10 @@ export const useBuscarTorneios = () => {
 
 export const useAdicionarStartupAoTorneio = () => {
   return useMutation({
-    mutationFn: async ({torneioId, startupId}: AdicionarStartupAoTorneio) => {
+    mutationFn: async ({torneio_id, startup_id}: AdicionarStartupAoTorneio) => {
       const response = await axios.post(
-        `${API_BASE_URL}/torneio/${torneioId}/startup`,
-        { startupId }
+        `${API_BASE_URL}/torneio/${torneio_id}/startup`,
+        { startup_id }
       );
       return response.data;
     },

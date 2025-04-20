@@ -46,6 +46,7 @@ function RouteComponent() {
   const [anoFundacaoStartup, setAnoFundacaoStartup] = useState("");
   const [startupSelecionada, setStartupSelecionada] = useState<string>("");
 
+  // Hook para buscar startups
   const {
     data: startups,
     isLoading: isLoadingStartups,
@@ -53,13 +54,16 @@ function RouteComponent() {
     isError: erroBuscarStartups,
   } = useBuscarStartups();
 
+  // Hook para criar startup
   const {
     mutate: criarStartup,
     isError: erroCriarStartup,
     error: errorCriarStartup,
     isSuccess: sucessoCriarStartup,
+    isPending: isCriarStartupLoading,
   } = useCriarStartup();
 
+  // Função de submit para criar startup
   const handleStartupSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     criarStartup({
@@ -83,6 +87,7 @@ function RouteComponent() {
     isError: erroCriarTorneio,
     error: errorCriarTorneio,
     isSuccess: sucessoCriarTorneio,
+    isPending: isCriarTorneioLoading,
   } = useCriarTorneio();
 
   // Função de submit para criar torneio
@@ -91,16 +96,22 @@ function RouteComponent() {
     criarTorneio({ nome: nomeTorneio });
   };
 
+  // Hook para adicionar startup ao torneio
   const {
-    mutate: adicionarStartupAoTorneio,
+    mutate: adicionarStartupTorneio,
+    isPending: isAdicionarStartupLoading,
+    isError: erroAdicionarStartup,
+    error: errorAdicionarStartup,
+    isSuccess: sucessoAdicionarStartup,
   } = useAdicionarStartupAoTorneio();
 
+  // Função de submit para adicionar startup ao torneio
   const handleStartupTorneioSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const torneioId = torneios[0].id;
-    adicionarStartupAoTorneio({
-      torneioId: torneioId,
-      startupId: startupSelecionada,
+    adicionarStartupTorneio({
+      torneio_id: torneioId,
+      startup_id: startupSelecionada,
     });
   };
 
@@ -144,6 +155,12 @@ function RouteComponent() {
       )}
       {sucessoCriarStartup && mostrarCriarStartupCard && (
         <SucessoAlert mensagem="Startup criada com sucesso!" />
+      )}
+      {erroAdicionarStartup && mostrarAdicionarStartupCard && (
+        <ErroAlert mensagem={(errorAdicionarStartup as Error).message} />
+      )}
+      {sucessoAdicionarStartup && mostrarAdicionarStartupCard && (
+        <SucessoAlert mensagem="Startup adicionada ao torneio com sucesso!" />
       )}
 
       {/* Botão para criar startup */}
@@ -197,12 +214,15 @@ function RouteComponent() {
             </CardContent>
             <CardFooter className="flex justify-between mt-4">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => setMostrarCriarStartupCard(false)}
               >
                 Cancelar
               </Button>
-              <Button type="submit">Enviar</Button>
+              <Button type="submit" disabled={isCriarStartupLoading}>
+                {isCriarStartupLoading ? "Enviando..." : "Enviar"}
+              </Button>
             </CardFooter>
           </form>
         </Card>
@@ -237,12 +257,15 @@ function RouteComponent() {
             </CardContent>
             <CardFooter className="flex justify-between mt-4">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => setMostrarCriarTorneioCard(false)}
               >
                 Cancelar
               </Button>
-              <Button type="submit">Enviar</Button>
+              <Button type="submit" disabled={isCriarTorneioLoading}>
+                {isCriarTorneioLoading ? "Enviando..." : "Enviar"}
+              </Button>
             </CardFooter>
           </form>
         </Card>
@@ -265,7 +288,11 @@ function RouteComponent() {
               <div className="grid w-full items-center gap-4">
                 <div className="flex flex-col space-y-1.5">
                   <Label>Nome da startup</Label>
-                  <Select onValueChange={(e) => setStartupSelecionada(e)}>
+                  <Select
+                    onValueChange={(e) => {
+                      setStartupSelecionada(e);
+                    }}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione a startup" />
                     </SelectTrigger>
@@ -273,12 +300,11 @@ function RouteComponent() {
                       <SelectGroup>
                         <SelectLabel>Startups</SelectLabel>
                         {isLoadingStartups ? (
-                          <Input type="text" value={"Carregando..."} readOnly />
+                          <SelectItem value={"Carregando..."} disabled />
                         ) : erroBuscarStartups ? (
-                          <Input
-                            type="text"
+                          <SelectItem
                             value={`Erro: ${errorBuscarStartups.message}`}
-                            readOnly
+                            disabled
                           />
                         ) : (
                           startups?.map(
@@ -311,12 +337,15 @@ function RouteComponent() {
             </CardContent>
             <CardFooter className="flex justify-between">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => setMostrarAdicionarStartupCard(false)}
               >
                 Cancelar
               </Button>
-              <Button type="submit">Enviar</Button>
+              <Button type="submit" disabled={isAdicionarStartupLoading}>
+                {isAdicionarStartupLoading ? "Enviando..." : "Enviar"}
+              </Button>
             </CardFooter>
           </form>
         </Card>
