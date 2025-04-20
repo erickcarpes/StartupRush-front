@@ -18,7 +18,7 @@ function Index() {
   }
 
   return (
-    <main className={`flex w-screen h-screen duration-800 ease-in-out transition-opacity ${transition ? "opacity-25" : "opacity-100"}`}>
+    <main className={`flex w-screen h-screen duration-1000 ease-in-out transition-transform ${transition ? "translate-x-[-100%]" : "translate-x-0"}`}>
       <div className="flex justify-center items-center bg-[#88abc2] w-[70%]">
         <h1 className="text-5xl font-semibold">Startup Rush</h1>
       </div>
