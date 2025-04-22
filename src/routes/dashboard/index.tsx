@@ -1,358 +1,410 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useCreateStartup } from "../../hooks/startup/useCreateStartup";
+import { useCriarTorneio } from "../../hooks/torneio/useCreateTorneio";
+import { useGetStartupsNaoTorneio } from "../../hooks/startup/useGetStartupsNaoTorneio";
+import { useAddStartupTorneio } from "../../hooks/torneio/useAddStartupTorneio";
+import { FormCard } from "../../components/FormCard";
+import { StartupSelect } from "../../components/StartupSelect";
+import { useGetTorneio } from "@/hooks/torneio/useGetTorneio";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, CheckCircle } from "lucide-react";
-import { useState } from "react";
-import {
-  useAdicionarStartupAoTorneio,
-  useBuscarTorneios,
-  useCriarTorneio,
-} from "@/hooks/useTorneio";
-import { useBuscarStartups, useCriarStartup } from "@/hooks/useStartup";
+import { createFileRoute } from "@tanstack/react-router";
+import { useStartTorneio } from "@/hooks/torneio/useStartTorneio";
+import { getErrorMessage } from "@/api/getErrorMessage";
+import { toast, Toaster } from "sonner";
+import { RankingTorneio } from "@/components/RankingTorneio";
+import { BatalhaSelect } from "@/components/BatalhaSelect";
+import { useGetBatalhasRodada } from "@/hooks/torneio/useGetBatalhasPorRodada";
+import { useStartBatalha } from "@/hooks/batalha/useStartBatalha";
+import { EventCard } from "@/components/EventCard";
+import { useEndBatalha } from "@/hooks/batalha/useEndBatalha";
+import { useGetBatalha } from "@/hooks/batalha/useGetBatalha";
+import { useAvancarRodada } from "@/hooks/torneio/useAvancarRodada";
 
 // Criando a rota para o componente
 export const Route = createFileRoute("/dashboard/")({
   component: RouteComponent,
 });
 
-// Componente principal da página
 function RouteComponent() {
   const [mostrarCriarStartupCard, setMostrarCriarStartupCard] = useState(false);
   const [mostrarCriarTorneioCard, setMostrarCriarTorneioCard] = useState(false);
-  const [mostrarAdicionarStartupCard, setMostrarAdicionarStartupCard] =
+  const [
+    mostrarAdicionarStartupTorneioCard,
+    setMostrarAdicionarStartupTorneioCard,
+  ] = useState(false);
+  const [mostrarVerBatalhasCard, setMostrarVerBatalhasCard] = useState(false);
+  const [mostrarBatalhaIniciadaCard, setMostrarBatalhaIniciadaCard] =
     useState(false);
-  const [nomeTorneio, setNomeTorneio] = useState("");
-  const [nomeStartup, setNomeStartup] = useState("");
-  const [sloganStartup, setSloganStartup] = useState("");
-  const [anoFundacaoStartup, setAnoFundacaoStartup] = useState("");
-  const [startupSelecionada, setStartupSelecionada] = useState<string>("");
+  const [startupNome, setStartupNome] = useState("");
+  const [slogan, setSlogan] = useState("");
+  const [anoFundacao, setAnoFundacao] = useState("");
+  const [torneioNome, setTorneioNome] = useState("");
+  const [startupIdSelecionada, setStartupIdSelecionada] = useState("");
+  const [batalhaIdSelecionada, setBatalhaIdSelecionada] = useState("");
 
-  // Hook para buscar startups
+  const { mutate: criarStartup, isPending: isCriarStartupLoading } =
+    useCreateStartup({
+      onSuccess: () => {
+        toast.success("Startup criada com sucesso! 🎉");
+      },
+      onError: (error) => {
+        toast.error("Erro ao criar startup!", {
+          description: getErrorMessage(error),
+        });
+      },
+    });
+
+  const { mutate: criarTorneio, isPending: isCriarTorneioLoading } =
+    useCriarTorneio({
+      onSuccess: () => {
+        toast.success("Torneio criado com sucesso! 🎉");
+      },
+      onError: (error) => {
+        toast.error("Erro ao criar torneio!", {
+          description: getErrorMessage(error),
+        });
+      },
+    });
+
+  const {
+    data: torneio,
+    isLoading: isTorneioLoading,
+    isError: isTorneioError,
+    error: errorTorneio,
+    refetch: refetchTorneio,
+  } = useGetTorneio();
+
   const {
     data: startups,
-    isLoading: isLoadingStartups,
-    error: errorBuscarStartups,
-    isError: erroBuscarStartups,
-  } = useBuscarStartups();
+    isLoading: isStartupsLoading,
+    isError: isStartupsError,
+    error: errorStartups,
+    refetch: refetchStartupsNaoTorneio,
+  } = useGetStartupsNaoTorneio({ id: torneio?.[0]?.id });
 
-  // Hook para criar startup
   const {
-    mutate: criarStartup,
-    isError: erroCriarStartup,
-    error: errorCriarStartup,
-    isSuccess: sucessoCriarStartup,
-    isPending: isCriarStartupLoading,
-  } = useCriarStartup();
+    data: batalhas,
+    isLoading: isBatalhasLoading,
+    isError: isBatalhasError,
+    error: errorBatalhas,
+    refetch: refetchBatalhas,
+  } = useGetBatalhasRodada(torneio?.[0]?.id);
 
-  // Função de submit para criar startup
-  const handleStartupSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    criarStartup({
-      nome: nomeStartup,
-      slogan: sloganStartup,
-      anoFundacao: Number(anoFundacaoStartup),
-    });
-  };
+  const { mutate: avancarRodada } = useAvancarRodada({
+    onSuccess: () => {
+      toast.success("Rodada avançada! 🎉");
+      refetchBatalhas();
+    },
+    onError: (error) => {
+      toast.error("Erro ao avançar rodada!", {
+        description: getErrorMessage(error),
+      });
+    },
+  });
 
-  // Hook para buscar torneios
-  const {
-    data: torneios,
-    isLoading: isLoadingTorneio,
-    isError: erroBuscarTorneio,
-    error: errorBuscarTorneio,
-  } = useBuscarTorneios();
+  useEffect(() => {
+    console.log("batalhas", batalhas);
+    console.log("torneio", torneio);
+    console.log("isBatalhasLoading", isBatalhasLoading);
+    if (!isBatalhasLoading && batalhas?.length === 0 && torneio?.[0]?.id) {
+      console.log("Avançando rodada");
+      avancarRodada(torneio[0].id);
+      refetchBatalhas();
+    }
+  }, [batalhas, isBatalhasLoading, torneio, avancarRodada, refetchBatalhas]);
 
-  // Hook para criar torneio
-  const {
-    mutate: criarTorneio,
-    isError: erroCriarTorneio,
-    error: errorCriarTorneio,
-    isSuccess: sucessoCriarTorneio,
-    isPending: isCriarTorneioLoading,
-  } = useCriarTorneio();
-
-  // Função de submit para criar torneio
-  const handleTorneioSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    criarTorneio({ nome: nomeTorneio });
-  };
-
-  // Hook para adicionar startup ao torneio
   const {
     mutate: adicionarStartupTorneio,
-    isPending: isAdicionarStartupLoading,
-    isError: erroAdicionarStartup,
-    error: errorAdicionarStartup,
-    isSuccess: sucessoAdicionarStartup,
-  } = useAdicionarStartupAoTorneio();
+    isPending: isAdicionarStartupTorneioLoading,
+  } = useAddStartupTorneio({
+    onSuccess: () => {
+      toast.success("Startup adicionada à torneio! 🎉");
+    },
+    onError: (error) => {
+      toast.error("Erro ao adicionar startup à torneio!", {
+        description: getErrorMessage(error),
+      });
+    },
+  });
 
-  // Função de submit para adicionar startup ao torneio
-  const handleStartupTorneioSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const torneioId = torneios[0].id;
-    adicionarStartupTorneio({
-      torneio_id: torneioId,
-      startup_id: startupSelecionada,
+  const { mutate: iniciarTorneio, isPending: isIniciarTorneioLoading } =
+    useStartTorneio({
+      onSuccess: () => {
+        toast.success("Torneio iniciado com sucesso! 🎉");
+      },
+      onError: (error) => {
+        toast.error("Erro ao iniciar torneio!", {
+          description: getErrorMessage(error),
+        });
+      },
     });
+
+  const { mutate: startBatalha } = useStartBatalha({
+    onSuccess: () => {
+      toast.success("Batalha iniciada com sucesso! 🎉");
+    },
+    onError: (error) => {
+      toast.error("Erro ao iniciar batalha!", {
+        description: getErrorMessage(error),
+      });
+    },
+  });
+
+  const { mutate: endBatalha } = useEndBatalha({
+    onSuccess: () => {
+      toast.success("Batalha finalizada com sucesso! 🎉");
+      console.log(batalhaStartup);
+      console.log(batalhaIdSelecionada);
+    },
+    onError: (error: unknown) => {
+      toast.error("Erro ao finalizar batalha!", {
+        description: getErrorMessage(error),
+      });
+      console.log(batalhaStartup);
+      console.log(batalhaIdSelecionada);
+    },
+  });
+
+  const { data: batalhaStartup } = useGetBatalha({ id: batalhaIdSelecionada });
+
+  const handleStartupSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await criarStartup({
+      nome: startupNome,
+      slogan,
+      anoFundacao: Number(anoFundacao),
+    });
+    setStartupNome("");
+    setSlogan("");
+    setAnoFundacao("");
+    refetchStartupsNaoTorneio();
   };
 
-  // Componente para exibir alertas de erro
-  function ErroAlert({ mensagem }: { mensagem: string }) {
-    return (
-      <Alert
-        className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-fit max-w-md"
-        variant="destructive"
-      >
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Erro</AlertTitle>
-        <AlertDescription>{mensagem}</AlertDescription>
-      </Alert>
-    );
-  }
+  const handleTorneioSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await criarTorneio({ nome: torneioNome });
+    setTorneioNome("");
+    refetchStartupsNaoTorneio();
+    refetchTorneio();
+  };
 
-  function SucessoAlert({ mensagem }: { mensagem: string }) {
-    return (
-      <Alert
-        className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-fit max-w-md text-green-600"
-        variant="default"
-      >
-        <CheckCircle className="h-4 w-4" />
-        <AlertTitle>Sucesso</AlertTitle>
-        <AlertDescription>{mensagem}</AlertDescription>
-      </Alert>
-    );
-  }
+  const handleAdicionarStartupSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+    if (!torneio[0].id) {
+      toast.error("Nenhum torneio disponível!");
+      return;
+    }
+    await adicionarStartupTorneio({
+      torneio_id: torneio[0].id,
+      startup_id: startupIdSelecionada,
+    });
+    setStartupIdSelecionada("");
+    refetchStartupsNaoTorneio();
+  };
+
+  const handleIniciarTorneio = async () => {
+    if (!torneio[0].id) {
+      toast.error("Nenhum torneio disponível!");
+      return;
+    }
+    await iniciarTorneio(torneio[0].id);
+    refetchBatalhas();
+  };
+
+  const handleEscolherBatalhaSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    startBatalha(batalhaIdSelecionada);
+    setMostrarBatalhaIniciadaCard(true);
+    setMostrarVerBatalhasCard(false);
+  };
 
   return (
-    <div className="w-full h-full justify-around items-center flex">
-      {erroCriarTorneio && mostrarCriarTorneioCard && (
-        <ErroAlert mensagem={(errorCriarTorneio as Error).message} />
-      )}
-      {sucessoCriarTorneio && mostrarCriarTorneioCard && (
-        <SucessoAlert mensagem="Torneio criado com sucesso!" />
-      )}
-      {erroCriarStartup && mostrarCriarStartupCard && (
-        <ErroAlert mensagem={(errorCriarStartup as Error).message} />
-      )}
-      {sucessoCriarStartup && mostrarCriarStartupCard && (
-        <SucessoAlert mensagem="Startup criada com sucesso!" />
-      )}
-      {erroAdicionarStartup && mostrarAdicionarStartupCard && (
-        <ErroAlert mensagem={(errorAdicionarStartup as Error).message} />
-      )}
-      {sucessoAdicionarStartup && mostrarAdicionarStartupCard && (
-        <SucessoAlert mensagem="Startup adicionada ao torneio com sucesso!" />
-      )}
+    <div className="flex flex-col w-full h-full p-10 bg-[#ffffff]">
+      <div className="flex flex-wrap gap-4 h-[30%] itens-center justify-center mb-3">
+        <Button
+          className="w-50 h-15 hover:cursor-pointer"
+          onClick={() => setMostrarCriarStartupCard(true)}
+        >
+          {isCriarStartupLoading ? "Criando..." : "Criar Startup"}
+        </Button>
+        <Button
+          className="w-50 h-15"
+          onClick={() => setMostrarCriarTorneioCard(true)}
+        >
+          {isCriarTorneioLoading ? "Criando..." : "Criar Torneio"}
+        </Button>
+        <Button
+          className="w-50 h-15 hover:cursor-pointer"
+          onClick={() => {
+            setMostrarAdicionarStartupTorneioCard(true);
+            refetchStartupsNaoTorneio();
+          }}
+        >
+          {isAdicionarStartupTorneioLoading
+            ? "Adicionando..."
+            : "Adicionar Startup ao torneio"}
+        </Button>
+        <Button
+          className="w-50 h-15 hover:cursor-pointer"
+          onClick={handleIniciarTorneio}
+          disabled={isIniciarTorneioLoading}
+        >
+          {isIniciarTorneioLoading ? "Iniciando..." : "Iniciar Torneio"}
+        </Button>
+        <Button
+          className="w-50 h-15 hover:cursor-pointer"
+          onClick={() => setMostrarVerBatalhasCard(true)}
+        >
+          Ver Batalhas
+        </Button>
+        <Button className="w-50 h-15 hover:cursor-pointer">Ranking top 10</Button>
+      </div>
+      <div className="flex h-[10%] items-center justify-center mb-3">
+        <h1 className="text-3xl font-bold">
+          {isTorneioError || !torneio || torneio.length === 0
+            ? "Nenhum torneio disponível"
+            : `Torneio ${torneio[0].nome}`}
+        </h1>
+      </div>
+      <div>
+        {isTorneioLoading ? (
+          <Input type="text" value="Carregando torneio..." readOnly />
+        ) : isTorneioError || !torneio || torneio.length === 0 ? (
+          <Input
+            type="text"
+            value={`Erro: ${getErrorMessage(errorTorneio) || "Nenhum torneio disponível"}`}
+            readOnly
+          />
+        ) : (
+          <RankingTorneio torneio={torneio[0]} />
+        )}
+      </div>
+      <div className="fixed flex items-center justify-center top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl">
+        <FormCard
+          title="Criar startup"
+          description="Crie a sua startup"
+          onSubmit={handleStartupSubmit}
+          onCancel={() => setMostrarCriarStartupCard(false)}
+          isLoading={isCriarStartupLoading}
+          isVisible={mostrarCriarStartupCard}
+        >
+          <Input
+            placeholder="Digite o nome da startup"
+            value={startupNome}
+            onChange={(e) => setStartupNome(e.target.value)}
+            required
+          />
+          <Input
+            placeholder="Digite o slogan da startup"
+            value={slogan}
+            onChange={(e) => setSlogan(e.target.value)}
+            required
+          />
+          <Input
+            placeholder="Digite o ano de fundação da startup"
+            type="number"
+            min={1900}
+            max={new Date().getFullYear()}
+            value={anoFundacao}
+            onChange={(e) => setAnoFundacao(e.target.value)}
+            required
+          />
+        </FormCard>
 
-      {/* Botão para criar startup */}
-      <Button onClick={() => setMostrarCriarStartupCard(true)}>
-        Criar startup
-      </Button>
+        <FormCard
+          title="Criar torneio"
+          description="Crie o torneio"
+          onSubmit={handleTorneioSubmit}
+          onCancel={() => setMostrarCriarTorneioCard(false)}
+          isLoading={isCriarTorneioLoading}
+          isVisible={mostrarCriarTorneioCard}
+        >
+          <Input
+            placeholder="Digite o nome do torneio"
+            value={torneioNome}
+            onChange={(e) => setTorneioNome(e.target.value)}
+            required
+          />
+        </FormCard>
 
-      {/* Card para criar startup */}
-      {mostrarCriarStartupCard && (
-        <Card className="absolute w-100 z-50">
-          <CardHeader>
-            <CardTitle>Criar startup</CardTitle>
-            <CardDescription>Crie a sua startup</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleStartupSubmit}>
-            <CardContent>
-              <div className="grid w-full items-center gap-4">
-                <div className="flex flex-col space-y-1.5">
-                  <Label>Nome</Label>
-                  <Input
-                    onChange={(e) => setNomeStartup(e.target.value)}
-                    type="text"
-                    value={nomeStartup}
-                    placeholder="Nome da sua startup"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col space-y-1.5">
-                  <Label>Slogan</Label>
-                  <Input
-                    onChange={(e) => setSloganStartup(e.target.value)}
-                    type="text"
-                    value={sloganStartup}
-                    placeholder="Slogan da sua startup"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col space-y-1.5">
-                  <Label>Ano de fundação</Label>
-                  <Input
-                    onChange={(e) => setAnoFundacaoStartup(e.target.value)}
-                    type="number"
-                    min={1900}
-                    max={new Date().getFullYear()}
-                    value={anoFundacaoStartup}
-                    placeholder="Ano de fundação da sua startup"
-                    required
-                  />
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between mt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setMostrarCriarStartupCard(false)}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isCriarStartupLoading}>
-                {isCriarStartupLoading ? "Enviando..." : "Enviar"}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-      )}
+        <FormCard
+          title="Adicionar startup ao torneio"
+          description="Adicione uma startup ao torneio em andamento"
+          onSubmit={handleAdicionarStartupSubmit}
+          onCancel={() => setMostrarAdicionarStartupTorneioCard(false)}
+          isLoading={isAdicionarStartupTorneioLoading}
+          isVisible={mostrarAdicionarStartupTorneioCard}
+        >
+          {isStartupsLoading ? (
+            <Input type="text" value="Carregando startups..." readOnly />
+          ) : isStartupsError || !startups || startups.length === 0 ? (
+            <Input type="text" value="Nenhuma startup disponível" readOnly />
+          ) : (
+            <StartupSelect
+              startups={startups ?? []}
+              isLoading={isStartupsLoading}
+              isError={isStartupsError}
+              errorMsg={getErrorMessage(errorStartups)}
+              onChange={setStartupIdSelecionada}
+            />
+          )}
+          <div className="flex flex-col space-y-1.5 mt-4">
+            <Label>Torneio</Label>
+            {isTorneioLoading ? (
+              <Input type="text" value="Carregando torneio..." readOnly />
+            ) : isTorneioError || !torneio || torneio.length === 0 ? (
+              <Input
+                type="text"
+                value={`Erro: ${getErrorMessage(errorTorneio) || "Nenhum torneio disponível"}`}
+                readOnly
+              />
+            ) : (
+              <Input type="text" value={torneio[0].nome} readOnly />
+            )}
+          </div>
+        </FormCard>
 
-      {/* Botão para criar torneio */}
-      <Button onClick={() => setMostrarCriarTorneioCard(true)}>
-        Criar torneio
-      </Button>
+        <FormCard
+          title="Ver Batalhas"
+          description="Escolha uma batalha"
+          onSubmit={handleEscolherBatalhaSubmit}
+          onCancel={() => setMostrarVerBatalhasCard(false)}
+          isLoading={isBatalhasLoading}
+          isVisible={mostrarVerBatalhasCard}
+        >
+          <BatalhaSelect
+            batalhas={batalhas ?? []}
+            isLoading={isBatalhasLoading}
+            isError={isBatalhasError}
+            errorMsg={getErrorMessage(errorBatalhas)}
+            onChange={setBatalhaIdSelecionada}
+          ></BatalhaSelect>
+        </FormCard>
 
-      {/* Card para criar torneio */}
-      {mostrarCriarTorneioCard && (
-        <Card className="absolute w-100 z-50">
-          <CardHeader>
-            <CardTitle>Criar torneio</CardTitle>
-            <CardDescription>Crie um torneio</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleTorneioSubmit}>
-            <CardContent>
-              <div className="grid w-full items-center gap-4">
-                <div className="flex flex-col space-y-1.5">
-                  <Label>Nome</Label>
-                  <Input
-                    type="text"
-                    value={nomeTorneio}
-                    onChange={(e) => setNomeTorneio(e.target.value)}
-                    placeholder="Nome do torneio"
-                    required
-                  />
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between mt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setMostrarCriarTorneioCard(false)}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isCriarTorneioLoading}>
-                {isCriarTorneioLoading ? "Enviando..." : "Enviar"}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-      )}
-
-      {/* Botão para adicionar startup ao torneio */}
-      <Button onClick={() => setMostrarAdicionarStartupCard(true)}>
-        Adicionar startup a torneio
-      </Button>
-
-      {/* Card para adicionar startup ao torneio */}
-      {mostrarAdicionarStartupCard && (
-        <Card className="absolute w-100 z-50">
-          <CardHeader>
-            <CardTitle>Adicionar startup a torneio</CardTitle>
-            <CardDescription>Adicionar startup a torneio</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleStartupTorneioSubmit}>
-            <CardContent>
-              <div className="grid w-full items-center gap-4">
-                <div className="flex flex-col space-y-1.5">
-                  <Label>Nome da startup</Label>
-                  <Select
-                    onValueChange={(e) => {
-                      setStartupSelecionada(e);
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione a startup" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Startups</SelectLabel>
-                        {isLoadingStartups ? (
-                          <SelectItem value={"Carregando..."} disabled />
-                        ) : erroBuscarStartups ? (
-                          <SelectItem
-                            value={`Erro: ${errorBuscarStartups.message}`}
-                            disabled
-                          />
-                        ) : (
-                          startups?.map(
-                            (startup: { id: string; nome: string }) => (
-                              <SelectItem key={startup.id} value={startup.id}>
-                                {startup.nome}
-                              </SelectItem>
-                            )
-                          )
-                        )}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex flex-col space-y-1.5">
-                  <Label>Torneio</Label>
-                  {isLoadingTorneio ? (
-                    <Input type="text" value={"Carregando..."} readOnly />
-                  ) : erroBuscarTorneio ? (
-                    <Input
-                      type="text"
-                      value={`Erro: ${errorBuscarTorneio.message}`}
-                      readOnly
-                    />
-                  ) : (
-                    <Input type="text" value={torneios[0].nome} readOnly />
-                  )}
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setMostrarAdicionarStartupCard(false)}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isAdicionarStartupLoading}>
-                {isAdicionarStartupLoading ? "Enviando..." : "Enviar"}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-      )}
-
-      {/* Botão para ranking */}
-      <Button>Ranking top 10 startups</Button>
+        {batalhaStartup?.length === 2 && (
+          <EventCard
+            startup1={{
+              id: batalhaStartup[0].startup.id,
+              nome: batalhaStartup[0].startup.nome,
+            }}
+            startup2={{
+              id: batalhaStartup[1].startup.id,
+              nome: batalhaStartup[1].startup.nome,
+            }}
+            onClose={() => setMostrarBatalhaIniciadaCard(false)}
+            onSubmit={(eventos) => {
+              endBatalha({ batalhaId: batalhaIdSelecionada, eventos });
+              setMostrarBatalhaIniciadaCard(false);
+            }}
+            isVisible={mostrarBatalhaIniciadaCard}
+          />
+        )}
+      </div>
+      <Toaster />
     </div>
   );
 }
