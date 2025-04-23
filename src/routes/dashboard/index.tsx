@@ -151,9 +151,9 @@ function RouteComponent() {
       setStartupIdSelecionada("");
       refetchStartupsNaoTorneio();
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("Erro ao adicionar startup à torneio!", {
-        description: getErrorMessage(error),
+        description: "Startup já está no torneio",
       });
     },
   });
@@ -512,7 +512,7 @@ function RouteComponent() {
           ultimoTorneio.length === 0 ? (
           <Input
             type="text"
-            value={`Erro: ${getErrorMessage(errorUltimoTorneio) || "Nenhum torneio disponível"}`}
+            value={`${getErrorMessage(errorUltimoTorneio) || "Nenhum torneio disponível"}`}
             readOnly
           />
         ) : (
