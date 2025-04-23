@@ -35,6 +35,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { queryClient } from "@/main";
+import { useGetStartupsTorneio } from "@/hooks/startup/useGetStartupsTorneio";
 
 // Criando a rota para o componente
 export const Route = createFileRoute("/dashboard/")({
@@ -105,6 +106,13 @@ function RouteComponent() {
     refetch: refetchBatalhas,
   } = useGetBatalhasRodada(torneioId);
 
+  const {
+    data: startupsTorneio,
+    isLoading: isLoadingStartupsTorneio,
+    isError: isErrorStartupsTorneio,
+    refetch: refetchStartupsTorneio,
+  } = useGetStartupsTorneio();
+
   // Hook para criar startup
   const { mutate: criarStartup, isPending: isCriarStartupPending } =
     useCreateStartup({
@@ -150,6 +158,7 @@ function RouteComponent() {
       toast.success("Startup adicionada à torneio! 🎉");
       setStartupIdSelecionada("");
       refetchStartupsNaoTorneio();
+      refetchStartupsTorneio();
     },
     onError: () => {
       toast.error("Erro ao adicionar startup à torneio!", {
@@ -225,6 +234,7 @@ function RouteComponent() {
       }
       refetchBatalhas();
       refetchTorneioAndamento();
+      refetchStartupsTorneio();
       queryClient.invalidateQueries({ queryKey: ["ranking"] });
 
       setTimeout(() => {
@@ -516,7 +526,12 @@ function RouteComponent() {
             readOnly
           />
         ) : (
-          <RankingTorneio torneio={ultimoTorneio} />
+          <RankingTorneio
+            torneio={ultimoTorneio}
+            startups={startupsTorneio}
+            isError={isErrorStartupsTorneio}
+            isLoading={isLoadingStartupsTorneio}
+          />
         )}
       </div>
       {batalhaStartup?.batalhas.length === 2 &&

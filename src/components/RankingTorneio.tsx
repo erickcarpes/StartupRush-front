@@ -7,7 +7,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useGetStartupsTorneio } from "@/hooks/startup/useGetStartupsTorneio";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface Startup {
@@ -28,13 +27,17 @@ interface Torneio {
   nome: string;
 }
 
-export function RankingTorneio({ torneio }: { torneio: Torneio }) {
-  const {
-    data: startups,
-    isLoading,
-    isError,
-  } = useGetStartupsTorneio();
-
+export function RankingTorneio({
+  torneio,
+  startups,
+  isLoading,
+  isError,
+}: {
+  torneio: Torneio;
+  startups: Startup[];
+  isLoading: boolean;
+  isError: boolean;
+}) {
   const getMedalEmoji = (index: number) => {
     return ["🥇", "🥈", "🥉"][index] || "";
   };
