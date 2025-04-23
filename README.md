@@ -37,10 +37,10 @@ Este repositório contém o front-end da aplicação **StartupRush**, uma plataf
   VITE_API_URL="http://localhost:3000"
   Substitua **"https://localhost:3000"** pela URL do seu backend, se diferente
 
-4. **Inicie o servidor:**
+4. **Inicie o servidor de desenvolvimento:**
 
-  ```bash
-  npm run dev
+   ```bash
+   npm run dev
 
 5. **Integração com o Back-end:**
   
