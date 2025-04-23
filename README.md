@@ -44,4 +44,4 @@ Este repositório contém o front-end da aplicação **StartupRush**, uma plataf
 
 5. **Integração com o Back-end:**
   
-  Certifique-se de que o back-end da aplicação (disponível em StartupRush-back) esteja em execução e que a variável VITE_API_URL aponte para o endereço correto do servidor.
+  Certifique-se de que o back-end da aplicação (disponível em [StartupRush-back](https://github.com/erickcarpes/StartupRush-back)) esteja em execução e que a variável VITE_API_URL aponte para o endereço correto do servidor.
