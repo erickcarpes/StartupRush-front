@@ -1,77 +1,47 @@
-🚀 StartupRush - Front-end
-Este repositório contém o front-end da aplicação StartupRush, uma plataforma para gerenciamento de torneios entre startups, com lógica de batalhas eliminatórias, pontuação dinâmica e rankings.
+# 🚀 StartupRush - Front-end
 
-🛠️ Tecnologias Utilizadas
-React: Biblioteca JavaScript para construção de interfaces de usuário.
+Este repositório contém o front-end da aplicação **StartupRush**, uma plataforma para gerenciamento de torneios entre startups, com lógica de batalhas eliminatórias, pontuação dinâmica e rankings.
 
-TypeScript: Superset do JavaScript que adiciona tipagem estática.
+## 🛠️ Tecnologias Utilizadas
 
-Vite: Ferramenta de build rápida para projetos front-end.
+- **React**: Biblioteca JavaScript para construção de interfaces de usuário.
+- **TypeScript**: Superset do JavaScript que adiciona tipagem estática.
+- **Vite**: Ferramenta de build rápida para projetos front-end.
+- **Tailwind CSS**: Framework utilitário para estilização rápida e responsiva.
+- **TanStack Router**: Gerenciador de rotas para aplicações React.
+- **Axios**: Cliente HTTP para realizar requisições ao back-end.
 
-Tailwind CSS: Framework utilitário para estilização rápida e responsiva.
+## 📦 Instalação
 
-TanStack Router: Gerenciador de rotas para aplicações React.
+### Pré-requisitos
 
-Axios: Cliente HTTP para realizar requisições ao back-end.
+- [Node.js](https://nodejs.org/) (versão 14 ou superior)
+- [npm](https://www.npmjs.com/)
 
-📦 Instalação
-Pré-requisitos
-Node.js (versão 14 ou superior)
+### Passos
 
-Yarn ou npm
+1. **Clone o repositório:**
 
-Passos
-Clone o repositório:
+   ```bash
+   git clone https://github.com/erickcarpes/StartupRush-front.git
+   cd StartupRush-front
 
-bash
-Copiar
-Editar
-git clone https://github.com/erickcarpes/StartupRush-front.git
-cd StartupRush-front
-Instale as dependências:
+2. **Instale as dependências:**
 
-bash
-Copiar
-Editar
-npm install
-# ou
-yarn install
-Configure as variáveis de ambiente:
+   ```bash
+   npm install
 
-Crie um arquivo .env na raiz do projeto com as seguintes variáveis:
+3. **Configuração das variáveis de ambiente:**
 
-env
-Copiar
-Editar
-VITE_API_URL="http://localhost:3000"
-Substitua "http://localhost:3000" pela URL do seu back-end, se diferente.
+  Crie um arquivo **.env** na raiz do seu projeto com a seguinte variável:
+  VITE_API_URL="http://localhost:3000"
+  Substitua **"https://localhost:3000"** pela URL do seu backend, se diferente
 
-Inicie o servidor de desenvolvimento:
+4. **Inicie o servidor:**
 
-bash
-Copiar
-Editar
-npm run dev
-# ou
-yarn dev
-A aplicação estará disponível em http://localhost:5173 (ou outra porta especificada pelo Vite).
+  ```bash
+  npm run dev
 
-📁 Estrutura do Projeto
-pgsql
-Copiar
-Editar
-StartupRush-front/
-├── public/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── routes/
-│   ├── services/
-│   ├── App.tsx
-│   └── main.tsx
-├── .env
-├── package.json
-├── tsconfig.json
-└── vite.config.ts
-🔗 Integração com o Back-end
-Certifique-se de que o back-end da aplicação (disponível em StartupRush-back) esteja em execução e que a variável VITE_API_URL aponte para o endereço correto do servidor.
+## Integração com o Back-end
+  
+  Certifique-se de que o back-end da aplicação (disponível em StartupRush-back) esteja em execução e que a variável VITE_API_URL aponte para o endereço correto do servidor.
