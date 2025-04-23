@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 import { Route as DashboardIndexImport } from './routes/dashboard/index'
+import { Route as DashboardRankingIndexImport } from './routes/dashboard/ranking/index'
 
 // Create/Update Routes
 
@@ -32,6 +33,12 @@ const IndexRoute = IndexImport.update({
 const DashboardIndexRoute = DashboardIndexImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DashboardRankingIndexRoute = DashboardRankingIndexImport.update({
+  id: '/dashboard/ranking/',
+  path: '/dashboard/ranking/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -60,6 +67,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexImport
       parentRoute: typeof rootRoute
     }
+    '/dashboard/ranking/': {
+      id: '/dashboard/ranking/'
+      path: '/dashboard/ranking'
+      fullPath: '/dashboard/ranking'
+      preLoaderRoute: typeof DashboardRankingIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -69,12 +83,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/ranking': typeof DashboardRankingIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/ranking': typeof DashboardRankingIndexRoute
 }
 
 export interface FileRoutesById {
@@ -82,14 +98,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/ranking/': typeof DashboardRankingIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/dashboard'
+  fullPaths: '/' | '/about' | '/dashboard' | '/dashboard/ranking'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/dashboard'
-  id: '__root__' | '/' | '/about' | '/dashboard/'
+  to: '/' | '/about' | '/dashboard' | '/dashboard/ranking'
+  id: '__root__' | '/' | '/about' | '/dashboard/' | '/dashboard/ranking/'
   fileRoutesById: FileRoutesById
 }
 
@@ -97,12 +114,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardRankingIndexRoute: typeof DashboardRankingIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardRankingIndexRoute: DashboardRankingIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -117,7 +136,8 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/about",
-        "/dashboard/"
+        "/dashboard/",
+        "/dashboard/ranking/"
       ]
     },
     "/": {
@@ -128,6 +148,9 @@ export const routeTree = rootRoute
     },
     "/dashboard/": {
       "filePath": "dashboard/index.tsx"
+    },
+    "/dashboard/ranking/": {
+      "filePath": "dashboard/ranking/index.tsx"
     }
   }
 }

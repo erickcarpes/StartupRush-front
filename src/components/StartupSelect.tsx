@@ -29,6 +29,7 @@ export function StartupSelect({
   onChange,
 }: StartupSelectProps) {
   return (
+    console.log("startups", startups),
     <Select onValueChange={onChange} required>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Selecione a startup" />

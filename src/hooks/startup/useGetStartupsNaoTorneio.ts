@@ -1,15 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/api/api";
 
-export const useGetStartupsNaoTorneio = ({ id }: { id: string; }) => {
-  return useQuery({
-    queryKey: ["startupsNaoTorneio", id],
+interface Startup {
+  id: string;
+  nome: string;
+}
+
+export const useGetStartupsNaoTorneio = () => {
+  return useQuery<Startup[]>({
+    queryKey: ["startupsNaoTorneio"],
     queryFn: async () => {
-      const response = await api.get(`/torneio/${id}/startupsNaoTorneio`);
-      return response.data;
+      const response = await api.get(`/torneios/startupsNaoTorneio`);
+      return response.data ?? [];
     },
-    enabled: !!id,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     retry: false,
   });
 };

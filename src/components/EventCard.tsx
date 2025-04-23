@@ -15,6 +15,7 @@ type Evento = {
 interface Startup {
   id: string;
   nome: string;
+  pontos: number;
 }
 
 interface EventCardProps {
@@ -58,9 +59,9 @@ export function EventCard({
         fakeNews: false,
       },
     ]);
-  
-      if (!isVisible) return null;
 
+  if (!isVisible) return null;
+  
   const handleCheckboxChange = (
     startupIndex: number,
     key: keyof Omit<Evento, "startup_id">,
@@ -91,7 +92,7 @@ export function EventCard({
       <div className="grid grid-cols-2 gap-8">
         {[startup1, startup2].map((startup, index) => (
           <div key={startup.id}>
-            <h3 className="font-semibold mb-2 text-center">{startup.nome}</h3>
+            <h3 className="font-semibold mb-2 text-center">{`${startup.nome} (${startup.pontos})`}</h3>
             {eventoKeys.map((key) => (
               <div key={key} className="flex items-center space-x-2 mb-2">
                 <Checkbox
@@ -114,7 +115,7 @@ export function EventCard({
         <Button variant="outline" onClick={onClose}>
           Voltar
         </Button>
-        <Button onClick={() => onSubmit(eventos)}>Encerrar Batalha</Button>
+        <Button onClick={() => {onSubmit(eventos)}}>Encerrar Batalha</Button>
       </div>
     </Card>
   );

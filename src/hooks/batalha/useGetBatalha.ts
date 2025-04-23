@@ -11,5 +11,6 @@ export const useGetBatalha = ({id}: {id: string}) => {
     ,
     enabled: !!id,
     retry: false,
+    refetchOnWindowFocus: true,
     });
 }

@@ -16,7 +16,6 @@ interface FormCardProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
   isLoading: boolean;
-  isVisible: boolean;
 }
 
 export function FormCard({
@@ -26,9 +25,7 @@ export function FormCard({
   onSubmit,
   onCancel,
   isLoading,
-  isVisible,
 }: FormCardProps) {
-  if (!isVisible) return null;
 
   return (
     <Card className="flex w-100 z-50">

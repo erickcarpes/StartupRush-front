@@ -11,7 +11,7 @@ type BatalhaComStartups = {
   participantes: Startup[];
 };
 
-export function useGetBatalhasRodada(torneioId?: string) {
+export function useGetBatalhasRodada(torneioId?: string | null) {
     console.log("useGetBatalhasRodada", torneioId);
   return useQuery<BatalhaComStartups[]>({
     queryKey: ["batalhasRodada", torneioId],
@@ -20,5 +20,7 @@ export function useGetBatalhasRodada(torneioId?: string) {
       return data;
     },
     enabled: !!torneioId,
+    refetchOnWindowFocus: true,
+    retry: false,
   });
 }

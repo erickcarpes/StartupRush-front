@@ -10,6 +10,23 @@ type Evento = {
   fakeNews: boolean;
 };
 
+interface EndBatalhaResponse {
+  message: string;
+  vencedor: {
+    nome: string;
+    slogan: string;
+  };
+  pontosVencedor: number;
+  rodada: string;
+  pontuacao: {
+    startup_id: string
+    nome: string
+    pontos: number
+  }[]
+  empate: boolean;
+};
+
+// Define the EndBatalhaParams type
 type EndBatalhaParams = {
   batalhaId: string;
   eventos: Evento[];
@@ -19,7 +36,7 @@ export const useEndBatalha = ({
   onSuccess,
   onError,
 }: {
-  onSuccess?: () => void;
+  onSuccess?: (data: EndBatalhaResponse) => void;
   onError?: (error: unknown) => void;
 }) => {
   return useMutation({
@@ -28,14 +45,13 @@ export const useEndBatalha = ({
         `/batalha/${batalhaId}/encerrar`,
         {eventos}
       );
-      console.log("Response:", response.data); // Log the response data
       return response.data;
     },
     onError: (error) => {
       if (onError) onError(error);
     },
-    onSuccess: () => {
-      if (onSuccess) onSuccess();
+    onSuccess: (data) => {
+      if (onSuccess) onSuccess(data);
     },
   });
 };

@@ -9,9 +9,6 @@ import {
 } from "@/components/ui/table";
 import { useGetStartupsTorneio } from "@/hooks/startup/useGetStartupsTorneio";
 import { Skeleton } from "@/components/ui/skeleton";
-//import { useGetStartup } from "@/hooks/startup/useGetStartup";
-//import api from "@/api/api";
-//import { useQueries } from "@tanstack/react-query";
 
 interface Startup {
   id: string;
@@ -36,7 +33,7 @@ export function RankingTorneio({ torneio }: { torneio: Torneio }) {
     data: startups,
     isLoading,
     isError,
-  } = useGetStartupsTorneio({ id: torneio?.id });
+  } = useGetStartupsTorneio();
 
   const getMedalEmoji = (index: number) => {
     return ["🥇", "🥈", "🥉"][index] || "";
@@ -94,7 +91,7 @@ export function RankingTorneio({ torneio }: { torneio: Torneio }) {
           ))
         ) : isError || !startups?.length ? (
           <TableRow>
-            <TableCell colSpan={9}>Nenhum torneio disponível.</TableCell>
+            <TableCell colSpan={9}>Nenhuma startup disponível.</TableCell>
           </TableRow>
         ) : (
           startups.map((startup: Startup, index: number) => (
